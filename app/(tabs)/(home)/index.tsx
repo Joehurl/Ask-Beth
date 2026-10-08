@@ -6,7 +6,6 @@ import {
   ScrollView,
   TextInput,
   Animated,
-  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -75,11 +74,6 @@ export default function HomeScreen() {
   function handleQuestionPress(question: string) {
     console.log('[Home] Pre-loaded question pressed:', question);
     router.push({ pathname: '/chat', params: { q: question } });
-  }
-
-  function handleBookChat() {
-    console.log('[Home] Book a chat pressed');
-    Alert.alert('Coming Soon', "One-to-one sessions with Beth are launching soon. Stay tuned!");
   }
 
   function handleVoiceSession() {
@@ -202,22 +196,6 @@ export default function HomeScreen() {
               </View>
             </AnimatedPressable>
           ))}
-        </Animated.View>
-
-        {/* Book a chat */}
-        <Animated.View style={[styles.bookingCard, { opacity: fadeAnim }]}>
-          <View style={styles.bookingTopRow}>
-            <Image source={BETH_AVATAR} style={styles.bookingAvatar} contentFit="cover" />
-            <View style={styles.bookingTextBlock}>
-              <Text style={styles.bookingTitle}>Book a chat with Beth</Text>
-              <Text style={styles.bookingSubtitle}>
-                Fifteen minutes, one to one — the first one's complimentary.
-              </Text>
-            </View>
-          </View>
-          <AnimatedPressable onPress={handleBookChat} style={styles.bookNowButton}>
-            <Text style={styles.bookNowText}>Book Now →</Text>
-          </AnimatedPressable>
         </Animated.View>
 
         {/* Bottom action row */}
@@ -391,53 +369,6 @@ const styles = StyleSheet.create({
     color: '#F5F0E8',
     fontSize: 15,
     fontWeight: '500',
-  },
-  bookingCard: {
-    backgroundColor: '#1A1A28',
-    borderWidth: 1,
-    borderColor: 'rgba(201,168,76,0.5)',
-    borderRadius: 18,
-    padding: 20,
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  bookingTopRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    marginBottom: 16,
-  },
-  bookingAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    flexShrink: 0,
-  },
-  bookingTextBlock: {
-    flex: 1,
-  },
-  bookingTitle: {
-    color: '#F5F0E8',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  bookingSubtitle: {
-    color: '#8A8A9A',
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 4,
-  },
-  bookNowButton: {
-    backgroundColor: '#C9A84C',
-    height: 46,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bookNowText: {
-    color: '#0A0A0F',
-    fontWeight: '700',
-    fontSize: 15,
   },
   actionRow: {
     flexDirection: 'row',
