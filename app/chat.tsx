@@ -180,18 +180,18 @@ const SCRIPTED_ANSWERS: ScriptedAnswer[] = [
     videoKey: 'initiate_intimacy',
   },
   {
-    keywords: ['favorite place', 'favorite food', 'favorite restaurant', 'where do you eat', 'do you eat', 'do you have kids', 'where do you live', 'are you married', 'do you have a family', 'how old are you', 'where are you from', 'what do you like', 'your favorite', 'favourite', 'do you like', 'have you ever', 'have you been'],
-    answer: "I appreciate you asking — but I should be honest with you. I don't have a favorite restaurant, a home, or a plate of food waiting for me anywhere. I'm an AI advisor, which means I don't eat, travel, or live the way you do. What I do have is a lot of insight into the things that matter to people — relationships, money, career, life decisions. Ask me something real, and I'll give you a real answer.",
+    keywords: ['favorite place', 'favorite food', 'favorite restaurant', 'where do you eat', 'do you eat', 'do you have kids', 'where do you live', 'are you married', 'do you have a family', 'how old are you', 'where are you from', 'what do you like', 'your favorite', 'favourite', 'do you like', 'have you ever', 'have you been', 'tell me about yourself', 'who are you', 'about you'],
+    answer: "I grew up in Charleston, South Carolina — so yes, I have opinions about food. My favorite place to eat is a small Italian spot in the West Village in New York that I've been going to for years. I order the same thing every time and I'm not sorry about it. I've lived in New York for most of my adult life, though I still get back to Charleston when I can. I'm not married — I came close once, and I learned more from that than from anything else in my life. No kids, but I have a niece who I'm completely devoted to. I've spent the last twenty years advising people through the hardest decisions of their lives, and honestly, I wouldn't trade it.",
   },
 ];
 
 const FALLBACK_RESPONSES = [
-  "That's a significant question. Let me ask you this — what does your gut tell you when you imagine yourself six months down that path?",
-  "I've seen this pattern before. The hesitation you're feeling isn't weakness — it's your instincts protecting you. What specifically feels off?",
-  "Strategic clarity comes from eliminating options, not adding them. What are you willing to walk away from?",
-  "The answer you're looking for isn't in the details. It's in the pattern. Tell me — has this happened before?",
-  "I hear you. And I want you to know — this room is completely private. Nothing leaves here. So tell me the real version.",
-  "Power moves quietly. The loudest person in the room rarely controls it. What's your read on the dynamics at play?",
+  "Hmm. That's not something I have a ready answer for — but I'm curious what made you ask. Tell me more.",
+  "You know, I've been asked a lot of things over the years, but that one's new. What's really behind the question?",
+  "I don't have a scripted answer for that — which usually means it's worth talking about. What's going on?",
+  "That's an interesting one. I'm not sure I have the perfect answer, but I have a feeling there's more to what you're asking. What's the real question underneath it?",
+  "I'll be honest — I wasn't expecting that. But I'm here. Tell me what's on your mind.",
+  "Some questions don't have clean answers, and I think this might be one of them. What would it mean to you if I said yes? What if I said no?",
 ];
 
 let fallbackIndex = 0;
