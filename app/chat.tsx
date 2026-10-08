@@ -240,7 +240,7 @@ function MessageBubble({ message, onHearBeth, isLoadingVideo }: MessageBubblePro
   );
 }
 
-function BethVideoModal({ videoUrl, onClose }: { videoUrl: string; onClose: () => void }) {
+function BethVideoModalNative({ videoUrl, onClose }: { videoUrl: string; onClose: () => void }) {
   const player = useVideoPlayer(videoUrl, (p) => {
     p.loop = false;
     p.play();
@@ -265,6 +265,48 @@ function BethVideoModal({ videoUrl, onClose }: { videoUrl: string; onClose: () =
       </View>
     </View>
   );
+}
+
+// Web-only: typed as any to avoid JSX conflicts with the native <video> element
+const WebVideo: any = 'video';
+
+function BethVideoModalWeb({ videoUrl, onClose }: { videoUrl: string; onClose: () => void }) {
+  const webVideoRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (webVideoRef.current) {
+      webVideoRef.current.play().catch(() => {});
+    }
+  }, [videoUrl]);
+
+  return (
+    <View style={styles.videoModalRoot}>
+      <WebVideo
+        ref={webVideoRef}
+        src={videoUrl}
+        autoPlay
+        controls
+        playsInline
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+      <View style={styles.videoCloseBtn}>
+        <AnimatedPressable onPress={onClose} style={styles.videoClosePressable}>
+          <X size={22} color="#F5F0E8" />
+        </AnimatedPressable>
+      </View>
+      <View style={styles.videoLabel}>
+        <Text style={styles.videoLabelText}>Beth</Text>
+        <Text style={styles.videoLabelSub}>Executive Counsel</Text>
+      </View>
+    </View>
+  );
+}
+
+function BethVideoModal({ videoUrl, onClose }: { videoUrl: string; onClose: () => void }) {
+  if (Platform.OS === 'web') {
+    return <BethVideoModalWeb videoUrl={videoUrl} onClose={onClose} />;
+  }
+  return <BethVideoModalNative videoUrl={videoUrl} onClose={onClose} />;
 }
 
 export default function ChatScreen() {
