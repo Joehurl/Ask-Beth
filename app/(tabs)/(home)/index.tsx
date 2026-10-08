@@ -1,0 +1,368 @@
+import React, { useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  Animated,
+  Pressable,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import { Mic, Clock, Settings } from 'lucide-react-native';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+
+const COLORS = {
+  background: '#0A0A0F',
+  card: '#13131A',
+  border: '#2A2A3A',
+  gold: '#C9A84C',
+  goldLight: '#E8C97A',
+  textPrimary: '#F5F0E8',
+  textSecondary: '#8A8A9A',
+  bethBubble: '#1A1A28',
+};
+
+const BETH_AVATAR = {
+  uri: 'https://prod-finalquest-user-projects-storage-bucket-aws.s3.amazonaws.com/user-projects/1175892c-54fd-41ce-9f30-f48071905fee/assets/images/dadf30b4-f21e-4232-8f1d-c727ca2b2ed8.jpg?AWSAccessKeyId=AKIAVRUVRKQJCONXPKGX&Signature=Bri39GWDqYThY9Uwja9l5Od1hXM%3D&Expires=1792026252',
+};
+
+const QUICK_TOPICS = [
+  'Career moves',
+  'Confidential advice',
+  'Strategic decisions',
+  'Relationship dynamics',
+  'Financial clarity',
+  'Life transitions',
+];
+
+export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const [question, setQuestion] = React.useState('');
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+  const avatarScale = useRef(new Animated.Value(0.85)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(avatarScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        speed: 12,
+        bounciness: 6,
+      }),
+    ]).start();
+  }, []);
+
+  function handleAskBeth() {
+    const q = question.trim();
+    console.log('[Home] Ask Beth pressed, question:', q || '(empty)');
+    router.push({ pathname: '/chat', params: { q } });
+  }
+
+  function handleTopicPress(topic: string) {
+    console.log('[Home] Quick topic pressed:', topic);
+    router.push({ pathname: '/chat', params: { q: topic } });
+  }
+
+  function handleVoiceSession() {
+    console.log('[Home] Voice Session pressed');
+    router.push('/voice');
+  }
+
+  function handlePastSessions() {
+    console.log('[Home] Past Sessions pressed');
+    router.push('/history');
+  }
+
+  function handleSettings() {
+    console.log('[Home] Settings pressed');
+    router.push('/settings');
+  }
+
+  return (
+    <View style={[styles.root, { backgroundColor: COLORS.background }]}>
+      {/* Settings button */}
+      <Animated.View
+        style={[
+          styles.settingsBtn,
+          { top: insets.top + 12 },
+          { opacity: fadeAnim },
+        ]}
+      >
+        <AnimatedPressable onPress={handleSettings} style={styles.settingsPressable}>
+          <Settings size={22} color={COLORS.textSecondary} />
+        </AnimatedPressable>
+      </Animated.View>
+
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 56, paddingBottom: insets.bottom + 32 },
+        ]}
+      >
+        {/* Hero section */}
+        <Animated.View
+          style={[
+            styles.heroSection,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }, { scale: avatarScale }],
+            },
+          ]}
+        >
+          <View style={styles.avatarWrapper}>
+            <View style={styles.avatarRing}>
+              <Image
+                source={BETH_AVATAR}
+                style={styles.avatar}
+                contentFit="cover"
+                accessibilityLabel="Beth, your AI executive counsel"
+              />
+            </View>
+          </View>
+
+          <Text style={styles.headline}>Ask Beth</Text>
+          <Text style={styles.subheadline}>Private counsel · Any hour you need her.</Text>
+
+          <View style={styles.statusBadge}>
+            <View style={styles.greenDot} />
+            <Text style={styles.statusText}>Available now</Text>
+          </View>
+        </Animated.View>
+
+        {/* Input section */}
+        <Animated.View
+          style={[
+            styles.inputSection,
+            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
+          ]}
+        >
+          <Text style={styles.sectionLabel}>What's on your mind?</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Ask me anything — career, strategy, life..."
+              placeholderTextColor={COLORS.textSecondary}
+              value={question}
+              onChangeText={setQuestion}
+              multiline
+              maxLength={500}
+              textAlignVertical="top"
+              returnKeyType="default"
+            />
+          </View>
+          <AnimatedPressable onPress={handleAskBeth} style={styles.askButton}>
+            <Text style={styles.askButtonText}>Ask Beth →</Text>
+          </AnimatedPressable>
+        </Animated.View>
+
+        {/* Quick topics */}
+        <Animated.View
+          style={[
+            styles.topicsSection,
+            { opacity: fadeAnim },
+          ]}
+        >
+          <Text style={styles.sectionLabel}>Quick topics</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.topicsRow}
+          >
+            {QUICK_TOPICS.map((topic) => (
+              <AnimatedPressable
+                key={topic}
+                onPress={() => handleTopicPress(topic)}
+                style={styles.topicChip}
+              >
+                <Text style={styles.topicChipText}>{topic}</Text>
+              </AnimatedPressable>
+            ))}
+          </ScrollView>
+        </Animated.View>
+
+        {/* Bottom action row */}
+        <Animated.View
+          style={[
+            styles.actionRow,
+            { opacity: fadeAnim },
+          ]}
+        >
+          <AnimatedPressable onPress={handleVoiceSession} style={styles.actionButton}>
+            <Mic size={20} color={COLORS.gold} />
+            <Text style={styles.actionButtonText}>Voice Session</Text>
+          </AnimatedPressable>
+
+          <AnimatedPressable onPress={handlePastSessions} style={styles.actionButton}>
+            <Clock size={20} color={COLORS.gold} />
+            <Text style={styles.actionButtonText}>Past Sessions</Text>
+          </AnimatedPressable>
+        </Animated.View>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  settingsBtn: {
+    position: 'absolute',
+    right: 20,
+    zIndex: 10,
+  },
+  settingsPressable: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+  },
+  heroSection: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  avatarWrapper: {
+    marginBottom: 20,
+  },
+  avatarRing: {
+    width: 108,
+    height: 108,
+    borderRadius: 54,
+    borderWidth: 2,
+    borderColor: '#C9A84C',
+    padding: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  headline: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#F5F0E8',
+    letterSpacing: -0.5,
+    marginBottom: 8,
+  },
+  subheadline: {
+    fontSize: 14,
+    color: '#C9A84C',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  greenDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#34C759',
+  },
+  statusText: {
+    fontSize: 12,
+    color: '#8A8A9A',
+  },
+  inputSection: {
+    marginBottom: 32,
+  },
+  sectionLabel: {
+    fontSize: 13,
+    color: '#8A8A9A',
+    marginBottom: 12,
+    fontWeight: '500',
+  },
+  inputWrapper: {
+    backgroundColor: '#13131A',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(201, 168, 76, 0.6)',
+    marginBottom: 12,
+    minHeight: 80,
+  },
+  textInput: {
+    color: '#F5F0E8',
+    fontSize: 15,
+    padding: 16,
+    minHeight: 80,
+    lineHeight: 22,
+  },
+  askButton: {
+    backgroundColor: '#C9A84C',
+    height: 52,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  askButtonText: {
+    color: '#0A0A0F',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  topicsSection: {
+    marginBottom: 32,
+  },
+  topicsRow: {
+    gap: 10,
+    paddingRight: 8,
+  },
+  topicChip: {
+    backgroundColor: '#1A1A28',
+    borderWidth: 1,
+    borderColor: '#2A2A3A',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  topicChipText: {
+    color: '#C9A84C',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: '#1A1A28',
+    borderWidth: 1,
+    borderColor: 'rgba(201, 168, 76, 0.4)',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  actionButtonText: {
+    color: '#F5F0E8',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+});
