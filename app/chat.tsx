@@ -251,7 +251,7 @@ function BethVideoModalNative({ videoUrl, onClose }: { videoUrl: string; onClose
       <VideoView
         player={player}
         style={styles.videoPlayer}
-        contentFit="cover"
+        contentFit="contain"
         nativeControls={false}
       />
       <View style={styles.videoCloseBtn}>
@@ -287,7 +287,7 @@ function BethVideoModalWeb({ videoUrl, onClose }: { videoUrl: string; onClose: (
         autoPlay
         controls
         playsInline
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#000' }}
       />
       <View style={styles.videoCloseBtn}>
         <AnimatedPressable onPress={onClose} style={styles.videoClosePressable}>
@@ -777,7 +777,7 @@ const styles = StyleSheet.create({
   },
   videoModalRoot: {
     flex: 1,
-    backgroundColor: '#0A0A0F',
+    backgroundColor: '#000',
   },
   videoPlayer: {
     flex: 1,
