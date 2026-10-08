@@ -28,11 +28,15 @@ const BETH_AVATAR = require('../../../assets/images/da99e73f-6f06-45b7-b465-fbc0
 
 const PRELOADED_QUESTIONS = [
   { question: "How do I know if he's serious?", category: "Dating" },
-  { question: "Do most women like sports?", category: "Life" },
   { question: "How should a first date go?", category: "Dating" },
-  { question: "When do I bring up money?", category: "Money" },
   { question: "How do I stop chasing him?", category: "Dating" },
-  { question: "Should I change my name when I marry?", category: "Marriage" },
+  { question: "Do men actually need to make the first move?", category: "Dating" },
+  { question: "Why is communication so indirect when something is wrong?", category: "Relationships" },
+  { question: "What does 'romance' mean in day-to-day life?", category: "Relationships" },
+  { question: "What does it mean when a guy says he's thinking about 'nothing'?", category: "Men" },
+  { question: "Does initiating intimacy matter to men as much as women?", category: "Men" },
+  { question: "Should I focus on paying off debt or saving first?", category: "Finance" },
+  { question: "What's the best technique to avoid burnout and stay focused?", category: "Productivity" },
 ];
 
 export default function HomeScreen() {
