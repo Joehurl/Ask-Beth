@@ -10,11 +10,13 @@ import {
   Animated,
   Alert,
   Pressable,
+  ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
-import { ChevronLeft, Trash2, Send, Mic } from 'lucide-react-native';
+import { ChevronLeft, Trash2, Send, Mic, X, Volume2 } from 'lucide-react-native';
 import Reanimated, {
   useSharedValue,
   useAnimatedStyle,
@@ -23,6 +25,7 @@ import Reanimated, {
   withSequence,
   SharedValue,
 } from 'react-native-reanimated';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { Message } from '@/utils/sessions';
 
@@ -158,9 +161,11 @@ function TypingIndicator() {
 
 interface MessageBubbleProps {
   message: Message;
+  onHearBeth?: (id: string, text: string) => void;
+  isLoadingVideo?: boolean;
 }
 
-function MessageBubble({ message }: MessageBubbleProps) {
+function MessageBubble({ message, onHearBeth, isLoadingVideo }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const timeStr = formatTime(message.timestamp);
 
@@ -183,6 +188,50 @@ function MessageBubble({ message }: MessageBubbleProps) {
           <Text style={styles.bethBubbleText}>{message.content}</Text>
         </View>
         <Text style={styles.timestamp}>{timeStr}</Text>
+        <AnimatedPressable
+          onPress={() => {
+            console.log('[Chat] Hear Beth answer pressed for message:', message.id);
+            onHearBeth?.(message.id, message.content);
+          }}
+          disabled={isLoadingVideo}
+          style={styles.hearBethBtn}
+        >
+          {isLoadingVideo ? (
+            <ActivityIndicator size="small" color="#C9A84C" />
+          ) : (
+            <>
+              <Volume2 size={13} color="#C9A84C" />
+              <Text style={styles.hearBethText}>Hear Beth answer</Text>
+            </>
+          )}
+        </AnimatedPressable>
+      </View>
+    </View>
+  );
+}
+
+function BethVideoModal({ videoUrl, onClose }: { videoUrl: string; onClose: () => void }) {
+  const player = useVideoPlayer(videoUrl, (p) => {
+    p.loop = false;
+    p.play();
+  });
+
+  return (
+    <View style={styles.videoModalRoot}>
+      <VideoView
+        player={player}
+        style={styles.videoPlayer}
+        contentFit="cover"
+        nativeControls={false}
+      />
+      <View style={styles.videoCloseBtn}>
+        <AnimatedPressable onPress={onClose} style={styles.videoClosePressable}>
+          <X size={22} color="#F5F0E8" />
+        </AnimatedPressable>
+      </View>
+      <View style={styles.videoLabel}>
+        <Text style={styles.videoLabelText}>Beth</Text>
+        <Text style={styles.videoLabelSub}>Executive Counsel</Text>
       </View>
     </View>
   );
@@ -196,6 +245,9 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoLoading, setVideoLoading] = useState(false);
+  const [videoLoadingMsgId, setVideoLoadingMsgId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const hasAutoSent = useRef(false);
 
@@ -243,6 +295,40 @@ export default function ChatScreen() {
       setIsTyping(false);
     }, delay);
   }, []);
+
+  async function handleHearBeth(messageId: string, text: string) {
+    if (videoLoading) return;
+    console.log('[Chat] handleHearBeth pressed, messageId:', messageId);
+    setVideoLoadingMsgId(messageId);
+    setVideoLoading(true);
+    try {
+      console.log('[Chat] Fetching HeyGen video for text:', text.substring(0, 60) + '...');
+      const res = await fetch('https://ziujnqcpjbflceercdij.supabase.co/functions/v1/heygen-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.log('[Chat] HeyGen video request failed:', res.status, errText);
+        Alert.alert('Could not generate video', 'Please try again.');
+        return;
+      }
+      const data = await res.json();
+      console.log('[Chat] HeyGen video response received, video_url:', data.video_url ? 'present' : 'missing');
+      if (data.video_url) {
+        setVideoUrl(data.video_url);
+      } else {
+        Alert.alert('Could not generate video', data.error || 'Please try again.');
+      }
+    } catch (e) {
+      console.log('[Chat] HeyGen video fetch error:', e);
+      Alert.alert('Error', 'Could not reach Beth right now. Please try again.');
+    } finally {
+      setVideoLoading(false);
+      setVideoLoadingMsgId(null);
+    }
+  }
 
   function handleSend() {
     console.log('[Chat] Send button pressed');
@@ -324,7 +410,13 @@ export default function ChatScreen() {
             if ('type' in item && item.type === 'typing') {
               return <TypingIndicator />;
             }
-            return <MessageBubble message={item as Message} />;
+            return (
+              <MessageBubble
+                message={item as Message}
+                onHearBeth={handleHearBeth}
+                isLoadingVideo={videoLoadingMsgId === (item as Message).id}
+              />
+            );
           }}
           ListEmptyComponent={
             <View style={styles.emptyState}>
@@ -368,6 +460,27 @@ export default function ChatScreen() {
           </AnimatedPressable>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Full-screen video modal */}
+      <Modal
+        visible={!!videoUrl}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => {
+          console.log('[Chat] Video modal closed');
+          setVideoUrl(null);
+        }}
+      >
+        {videoUrl ? (
+          <BethVideoModal
+            videoUrl={videoUrl}
+            onClose={() => {
+              console.log('[Chat] Video modal close button pressed');
+              setVideoUrl(null);
+            }}
+          />
+        ) : null}
+      </Modal>
     </View>
   );
 }
@@ -472,6 +585,27 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginHorizontal: 4,
   },
+  hearBethBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 6,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(201, 168, 76, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(201, 168, 76, 0.25)',
+    alignSelf: 'flex-start',
+    minHeight: 28,
+    minWidth: 80,
+    justifyContent: 'center',
+  },
+  hearBethText: {
+    fontSize: 12,
+    color: '#C9A84C',
+    fontWeight: '500',
+  },
   typingRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -560,5 +694,44 @@ const styles = StyleSheet.create({
   },
   sendBtnDisabled: {
     opacity: 0.4,
+  },
+  videoModalRoot: {
+    flex: 1,
+    backgroundColor: '#0A0A0F',
+  },
+  videoPlayer: {
+    flex: 1,
+    width: '100%',
+  },
+  videoCloseBtn: {
+    position: 'absolute',
+    top: 56,
+    left: 20,
+    zIndex: 10,
+  },
+  videoClosePressable: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoLabel: {
+    position: 'absolute',
+    bottom: 60,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  videoLabelText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#F5F0E8',
+  },
+  videoLabelSub: {
+    fontSize: 14,
+    color: '#C9A84C',
+    marginTop: 4,
   },
 });
