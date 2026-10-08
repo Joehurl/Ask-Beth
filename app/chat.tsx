@@ -53,6 +53,10 @@ const PRERECORDED_VIDEOS: Record<string, string> = {
   serious: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/serious.mp4',
   split: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/split.mp4',
   sports: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/sports.mp4',
+  water: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/water.mp4',
+  salary: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/salary.mp4',
+  debt: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/debt.mp4',
+  focus: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/focus.mp4',
 };
 
 interface ScriptedAnswer {
@@ -115,18 +119,22 @@ const SCRIPTED_ANSWERS: ScriptedAnswer[] = [
   {
     keywords: ["water", "how much water", "8 glasses", "hydration", "drinking water"],
     answer: "The traditional '8x8 rule' is a helpful baseline, but it isn't a strict scientific requirement for everyone. The National Academies of Sciences recommends about 15.5 cups (3.7 liters) of fluids per day for men and 11.5 cups (2.7 liters) for women. About 20% of your daily fluid intake comes from foods like fruits and vegetables. Adjust for exercise — add 1.5 to 2.5 cups for short workouts, more for intense endurance exercise. Hot or humid weather also increases your needs. The simplest indicators of good hydration: you rarely feel thirsty, and your urine is clear or light pale yellow.",
+    videoKey: "water",
   },
   {
     keywords: ["negotiate salary", "salary negotiation", "job offer", "negotiate pay", "rescind offer"],
     answer: "Negotiating salary is a standard part of the hiring process, and reputable employers rarely rescind an offer simply because you asked — as long as you stay professional and grounded in market research. Express enthusiasm for the role first, then anchor on objective data from Glassdoor, Payscale, or industry reports rather than personal expenses. Say something like: 'Based on current market rates for this scope in my region, the average range is X to Y — is there flexibility to adjust closer to Z?' If base salary is fixed, negotiate equity, signing bonuses, remote flexibility, or extra PTO. State your request, give your rationale, and let them respond.",
+    videoKey: "salary",
   },
   {
     keywords: ["pay off debt", "emergency fund", "debt or savings", "debt first", "save money"],
     answer: "Financial planners generally recommend a hybrid approach. First, build a mini emergency fund of $1,000 to $2,000 — or one month of basic living expenses — in a high-yield savings account before aggressively tackling debt. Then attack high-interest debt above 6 to 8 percent, like credit cards. Use the Avalanche Method (highest interest first, saves the most money) or the Snowball Method (smallest balance first, builds momentum). Once high-interest debt is gone, expand your emergency fund to 3 to 6 months of essential expenses. Low-interest debt like federal student loans can be paid on schedule while you invest long-term.",
+    videoKey: "debt",
   },
   {
     keywords: ["time management", "burnout", "staying focused", "pomodoro", "productivity", "focus technique"],
     answer: "One of the most validated methods for sustained focus is time-blocking paired with recovery intervals. Human energy naturally cycles in 90 to 120 minute peaks of alertness followed by a trough — work deeply on a single task for 90 minutes, then take a deliberate 15 to 20 minute rest. For smaller tasks, the Pomodoro Technique works well: 25 minutes of focused work, 5-minute break, and after 4 cycles take a longer 15 to 30 minute break. Neuroscience shows that task-switching reduces productivity by up to 40 percent. Structuring work into deliberate focus blocks protects deep concentration while scheduled recovery prevents mental fatigue.",
+    videoKey: "focus",
   },
 ];
 
