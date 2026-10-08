@@ -39,22 +39,74 @@ const COLORS = {
 
 const BETH_AVATAR = require('../assets/images/da99e73f-6f06-45b7-b465-fbc00b7f1169.jpeg');
 
-const BETH_RESPONSES = [
-  "That's a significant decision. Let me ask you this — what does your gut tell you when you imagine yourself 6 months down that path?",
+interface ScriptedAnswer {
+  keywords: string[];
+  answer: string;
+}
+
+const SCRIPTED_ANSWERS: ScriptedAnswer[] = [
+  {
+    keywords: ["serious", "he serious", "is he serious"],
+    answer: "Watch what he builds, not what he says — a serious man makes room in his calendar, his friends and his plans without being asked twice. If you have to keep explaining your own value to him, he's already given you the answer.",
+  },
+  {
+    keywords: ["women like sports", "sports", "do women"],
+    answer: "Some do, some don't — same as men. But the real question isn't whether women like sports. It's whether she likes them with you. If she doesn't care about the game and still curls up beside you to watch it, that isn't her tolerating your hobby. That's her choosing your company.",
+  },
+  {
+    keywords: ["first date", "how should a first date", "date go"],
+    answer: "Short, warm, and somewhere you can actually hear each other. Ninety minutes is plenty — long enough to know whether you'd see him again, short enough that nobody feels trapped. Let him plan it, and pay attention to whether he asks you anything real. Then watch how he treats the waiter. You'll learn more in an hour of watching than three hours of talking.",
+  },
+  {
+    keywords: ["bring up money", "when do i bring up money", "money"],
+    answer: "Earlier than feels romantic — somewhere around the third or fourth date, once you know you like each other but before you've merged any of your lives. Bring it up as a fact about yourself, not a test of him: what you save, what you owe, what you'd never split.",
+  },
+  {
+    keywords: ["stop chasing", "chasing him", "chasing"],
+    answer: "You stop by giving the ball back — one message, then silence, and the next move is his to make. Chasing isn't love with more effort; it's anxiety with a plan, and he can feel the difference.",
+  },
+  {
+    keywords: ["change my name", "change name", "marry", "marriage name"],
+    answer: "That's a question about paperwork pretending to be a question about love. Keep it, change it or take the hyphen — but decide it for your own reasons, and notice how he reacts when you say the true thing.",
+  },
+  {
+    keywords: ["say no", "without a war", "no without"],
+    answer: "Say it once, plainly, in your normal voice, and then stop explaining — the extra reasons are what turn a no into a negotiation. You're allowed to disappoint someone you love; that's a cost, not a crisis.",
+  },
+  {
+    keywords: ["earns more", "earns far more", "split things", "he earns"],
+    answer: "Split by proportion, not by pride — a percentage of what each of you earns keeps the shared life equal without making the lower earner a guest in it. And say out loud what you can't afford before you resent it quietly.",
+  },
+  {
+    keywords: ["promotion", "take the promotion", "evenings"],
+    answer: "Take it if it buys you something you actually want — money, skill, a door that opens later — and be honest about how long you'll pay that price. Nobody hands the evenings back afterwards, so put an end date on it before you say yes.",
+  },
+  {
+    keywords: ["miss him", "still miss", "how long", "allowed to miss"],
+    answer: "As long as it takes, and longer than the people around you would like, if he mattered to you. What you're not allowed to do is keep the missing private and let it quietly run your life — say it out loud to somebody who won't flinch.",
+  },
+];
+
+const FALLBACK_RESPONSES = [
+  "That's a significant question. Let me ask you this — what does your gut tell you when you imagine yourself six months down that path?",
   "I've seen this pattern before. The hesitation you're feeling isn't weakness — it's your instincts protecting you. What specifically feels off?",
-  "Here's what the data tells me: the people who thrive in transitions like this share one trait. They act before they feel ready. What's the smallest step you could take today?",
-  "Confidentiality is everything in situations like this. Before we go further — who else knows about this?",
   "Strategic clarity comes from eliminating options, not adding them. What are you willing to walk away from?",
   "The answer you're looking for isn't in the details. It's in the pattern. Tell me — has this happened before?",
   "I hear you. And I want you to know — this room is completely private. Nothing leaves here. So tell me the real version.",
   "Power moves quietly. The loudest person in the room rarely controls it. What's your read on the dynamics at play?",
 ];
 
-let responseIndex = 0;
+let fallbackIndex = 0;
 
-function getNextResponse(): string {
-  const response = BETH_RESPONSES[responseIndex % BETH_RESPONSES.length];
-  responseIndex++;
+function getBethResponse(userMessage: string): string {
+  const lower = userMessage.toLowerCase();
+  for (const item of SCRIPTED_ANSWERS) {
+    if (item.keywords.some((kw) => lower.includes(kw))) {
+      return item.answer;
+    }
+  }
+  const response = FALLBACK_RESPONSES[fallbackIndex % FALLBACK_RESPONSES.length];
+  fallbackIndex++;
   return response;
 }
 
@@ -179,7 +231,7 @@ export default function ChatScreen() {
     console.log('[Chat] Beth is typing, delay:', Math.round(delay), 'ms');
 
     setTimeout(() => {
-      const response = getNextResponse();
+      const response = getBethResponse(trimmed);
       console.log('[Chat] Beth responded:', response.substring(0, 50) + '...');
       const bethMsg: Message = {
         id: `msg_${Date.now()}_assistant`,

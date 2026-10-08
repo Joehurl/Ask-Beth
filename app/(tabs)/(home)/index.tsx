@@ -6,12 +6,12 @@ import {
   ScrollView,
   TextInput,
   Animated,
-  Pressable,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { Mic, Clock, Settings } from 'lucide-react-native';
+import { Mic, Clock, Settings, ChevronRight } from 'lucide-react-native';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
 
 const COLORS = {
@@ -27,13 +27,13 @@ const COLORS = {
 
 const BETH_AVATAR = require('../../../assets/images/da99e73f-6f06-45b7-b465-fbc00b7f1169.jpeg');
 
-const QUICK_TOPICS = [
-  'Career moves',
-  'Confidential advice',
-  'Strategic decisions',
-  'Relationship dynamics',
-  'Financial clarity',
-  'Life transitions',
+const PRELOADED_QUESTIONS = [
+  { question: "How do I know if he's serious?", category: "Dating" },
+  { question: "Do most women like sports?", category: "Life" },
+  { question: "How should a first date go?", category: "Dating" },
+  { question: "When do I bring up money?", category: "Money" },
+  { question: "How do I stop chasing him?", category: "Dating" },
+  { question: "Should I change my name when I marry?", category: "Marriage" },
 ];
 
 export default function HomeScreen() {
@@ -72,9 +72,14 @@ export default function HomeScreen() {
     router.push({ pathname: '/chat', params: { q } });
   }
 
-  function handleTopicPress(topic: string) {
-    console.log('[Home] Quick topic pressed:', topic);
-    router.push({ pathname: '/chat', params: { q: topic } });
+  function handleQuestionPress(question: string) {
+    console.log('[Home] Pre-loaded question pressed:', question);
+    router.push({ pathname: '/chat', params: { q: question } });
+  }
+
+  function handleBookChat() {
+    console.log('[Home] Book a chat pressed');
+    Alert.alert('Coming Soon', "One-to-one sessions with Beth are launching soon. Stay tuned!");
   }
 
   function handleVoiceSession() {
@@ -172,29 +177,47 @@ export default function HomeScreen() {
           </AnimatedPressable>
         </Animated.View>
 
-        {/* Quick topics */}
+        {/* Pre-loaded questions */}
         <Animated.View
           style={[
             styles.topicsSection,
             { opacity: fadeAnim },
           ]}
         >
-          <Text style={styles.sectionLabel}>Quick topics</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.topicsRow}
-          >
-            {QUICK_TOPICS.map((topic) => (
-              <AnimatedPressable
-                key={topic}
-                onPress={() => handleTopicPress(topic)}
-                style={styles.topicChip}
-              >
-                <Text style={styles.topicChipText}>{topic}</Text>
-              </AnimatedPressable>
-            ))}
-          </ScrollView>
+          <Text style={styles.sectionLabel}>Ask Beth about...</Text>
+          {PRELOADED_QUESTIONS.map((item) => (
+            <AnimatedPressable
+              key={item.question}
+              onPress={() => handleQuestionPress(item.question)}
+              style={styles.questionCard}
+            >
+              <View style={styles.questionCardInner}>
+                <View style={styles.questionCardLeft}>
+                  <View style={styles.categoryPill}>
+                    <Text style={styles.categoryPillText}>{item.category}</Text>
+                  </View>
+                  <Text style={styles.questionText}>{item.question}</Text>
+                </View>
+                <ChevronRight size={16} color="#8A8A9A" />
+              </View>
+            </AnimatedPressable>
+          ))}
+        </Animated.View>
+
+        {/* Book a chat */}
+        <Animated.View style={[styles.bookingCard, { opacity: fadeAnim }]}>
+          <View style={styles.bookingTopRow}>
+            <Image source={BETH_AVATAR} style={styles.bookingAvatar} contentFit="cover" />
+            <View style={styles.bookingTextBlock}>
+              <Text style={styles.bookingTitle}>Book a chat with Beth</Text>
+              <Text style={styles.bookingSubtitle}>
+                Fifteen minutes, one to one — the first one's complimentary.
+              </Text>
+            </View>
+          </View>
+          <AnimatedPressable onPress={handleBookChat} style={styles.bookNowButton}>
+            <Text style={styles.bookNowText}>Book Now →</Text>
+          </AnimatedPressable>
         </Animated.View>
 
         {/* Bottom action row */}
@@ -332,24 +355,89 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   topicsSection: {
-    marginBottom: 32,
+    marginBottom: 8,
   },
-  topicsRow: {
-    gap: 10,
-    paddingRight: 8,
-  },
-  topicChip: {
-    backgroundColor: '#1A1A28',
+  questionCard: {
+    backgroundColor: '#13131A',
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#2A2A3A',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    padding: 16,
+    marginBottom: 10,
   },
-  topicChipText: {
+  questionCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  questionCardLeft: {
+    flex: 1,
+    marginRight: 8,
+  },
+  categoryPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(201,168,76,0.12)',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginBottom: 6,
+  },
+  categoryPillText: {
     color: '#C9A84C',
-    fontSize: 13,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  questionText: {
+    color: '#F5F0E8',
+    fontSize: 15,
     fontWeight: '500',
+  },
+  bookingCard: {
+    backgroundColor: '#1A1A28',
+    borderWidth: 1,
+    borderColor: 'rgba(201,168,76,0.5)',
+    borderRadius: 18,
+    padding: 20,
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  bookingTopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 16,
+  },
+  bookingAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    flexShrink: 0,
+  },
+  bookingTextBlock: {
+    flex: 1,
+  },
+  bookingTitle: {
+    color: '#F5F0E8',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  bookingSubtitle: {
+    color: '#8A8A9A',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  bookNowButton: {
+    backgroundColor: '#C9A84C',
+    height: 46,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bookNowText: {
+    color: '#0A0A0F',
+    fontWeight: '700',
+    fontSize: 15,
   },
   actionRow: {
     flexDirection: 'row',
