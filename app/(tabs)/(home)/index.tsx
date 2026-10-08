@@ -34,9 +34,19 @@ const PRELOADED_QUESTIONS = [
   { question: "Why is communication so indirect when something is wrong?", category: "Relationships" },
   { question: "What does 'romance' mean in day-to-day life?", category: "Relationships" },
   { question: "What does it mean when a guy says he's thinking about 'nothing'?", category: "Men" },
+  { question: "How do men express vulnerability when overwhelmed?", category: "Men" },
   { question: "Does initiating intimacy matter to men as much as women?", category: "Men" },
   { question: "Should I focus on paying off debt or saving first?", category: "Finance" },
+  { question: "How should I negotiate my salary for a new job offer?", category: "Career" },
   { question: "What's the best technique to avoid burnout and stay focused?", category: "Productivity" },
+  { question: "How much water should I actually be drinking every day?", category: "Health" },
+  { question: "When do I bring up money in a relationship?", category: "Dating" },
+  { question: "How do I say no without starting a war?", category: "Relationships" },
+  { question: "How should we split things when he earns far more?", category: "Finance" },
+  { question: "Should I take the promotion if it means long evenings?", category: "Career" },
+  { question: "How long am I allowed to miss him?", category: "Life" },
+  { question: "Should I change my name when I marry?", category: "Life" },
+  { question: "Do women actually like sports?", category: "Men" },
 ];
 
 export default function HomeScreen() {
