@@ -179,6 +179,10 @@ const SCRIPTED_ANSWERS: ScriptedAnswer[] = [
     answer: `Yes, absolutely. Men frequently report feeling a lack of physical and emotional validation when they are expected to be the sole initiators of physical closeness.\n\nDesire to Feel Wanted: Men want to feel actively pursued and desired, not just accepted.\n\nBuilding Connection: Small, spontaneous acts—like an unexpected hug, holding his hand first, or initiating physical intimacy—go a long way in reinforcing his confidence and emotional connection to the relationship.`,
     videoKey: 'initiate_intimacy',
   },
+  {
+    keywords: ['favorite place', 'favorite food', 'favorite restaurant', 'where do you eat', 'do you eat', 'do you have kids', 'where do you live', 'are you married', 'do you have a family', 'how old are you', 'where are you from', 'what do you like', 'your favorite', 'favourite', 'do you like', 'have you ever', 'have you been'],
+    answer: "I appreciate you asking — but I should be honest with you. I don't have a favorite restaurant, a home, or a plate of food waiting for me anywhere. I'm an AI advisor, which means I don't eat, travel, or live the way you do. What I do have is a lot of insight into the things that matter to people — relationships, money, career, life decisions. Ask me something real, and I'll give you a real answer.",
+  },
 ];
 
 const FALLBACK_RESPONSES = [
