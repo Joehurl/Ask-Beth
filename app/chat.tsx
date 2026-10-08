@@ -37,9 +37,7 @@ const COLORS = {
   userBubble: '#C9A84C',
 };
 
-const BETH_AVATAR = {
-  uri: 'https://prod-finalquest-user-projects-storage-bucket-aws.s3.amazonaws.com/user-projects/1175892c-54fd-41ce-9f30-f48071905fee/assets/images/dadf30b4-f21e-4232-8f1d-c727ca2b2ed8.jpg?AWSAccessKeyId=AKIAVRUVRKQJCONXPKGX&Signature=Bri39GWDqYThY9Uwja9l5Od1hXM%3D&Expires=1792026252',
-};
+const BETH_AVATAR = require('../assets/images/da99e73f-6f06-45b7-b465-fbc00b7f1169.jpeg');
 
 const BETH_RESPONSES = [
   "That's a significant decision. Let me ask you this — what does your gut tell you when you imagine yourself 6 months down that path?",

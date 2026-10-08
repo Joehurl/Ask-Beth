@@ -14,9 +14,7 @@ import { ChevronLeft, Clock } from 'lucide-react-native';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { getSessions, clearSessions, Session } from '@/utils/sessions';
 
-const BETH_AVATAR = {
-  uri: 'https://prod-finalquest-user-projects-storage-bucket-aws.s3.amazonaws.com/user-projects/1175892c-54fd-41ce-9f30-f48071905fee/assets/images/dadf30b4-f21e-4232-8f1d-c727ca2b2ed8.jpg?AWSAccessKeyId=AKIAVRUVRKQJCONXPKGX&Signature=Bri39GWDqYThY9Uwja9l5Od1hXM%3D&Expires=1792026252',
-};
+const BETH_AVATAR = require('../assets/images/da99e73f-6f06-45b7-b465-fbc00b7f1169.jpeg');
 
 function formatSessionDate(date: Date): string {
   const now = new Date();
