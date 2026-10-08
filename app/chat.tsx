@@ -57,10 +57,17 @@ const PRERECORDED_VIDEOS: Record<string, string> = {
   salary: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/salary.mp4',
   debt: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/debt.mp4',
   focus: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/focus.mp4',
+  first_move: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/first_move.mp4',
+  indirect_communication: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/indirect_communication.mp4',
+  romance: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/romance.mp4',
+  thinking_nothing: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/thinking_nothing.mp4',
+  men_vulnerable: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/men_vulnerable.mp4',
+  initiate_intimacy: 'https://ziujnqcpjbflceercdij.supabase.co/storage/v1/object/public/beth-videos/initiate_intimacy.mp4',
 };
 
 interface ScriptedAnswer {
   keywords: string[];
+  question?: string;
   answer: string;
   videoKey?: string;
 }
@@ -136,6 +143,36 @@ const SCRIPTED_ANSWERS: ScriptedAnswer[] = [
     answer: "One of the most validated methods for sustained focus is time-blocking paired with recovery intervals. Human energy naturally cycles in 90 to 120 minute peaks of alertness followed by a trough — work deeply on a single task for 90 minutes, then take a deliberate 15 to 20 minute rest. For smaller tasks, the Pomodoro Technique works well: 25 minutes of focused work, 5-minute break, and after 4 cycles take a longer 15 to 30 minute break. Neuroscience shows that task-switching reduces productivity by up to 40 percent. Structuring work into deliberate focus blocks protects deep concentration while scheduled recovery prevents mental fatigue.",
     videoKey: "focus",
   },
+  {
+    keywords: ['first move', 'make the first move', 'take the lead', 'initiate', 'who should ask'],
+    question: "Do men actually need to make the first move, or do women enjoy taking the lead?",
+    answer: `While traditional social norms often placed the burden on men to initiate contact, the vast majority of modern women genuinely appreciate when a man or partner takes initiative, but they are equally open to making the first move themselves.\n\nWhy initiative matters: Making the first move signals confidence, clear interest, and decisiveness—traits universally found attractive regardless of gender.\n\nTaking turns: Many women enjoy taking the lead once mutual interest is established (such as planning a date or initiating physical affection).`,
+  },
+  {
+    keywords: ['indirect', 'communication', 'something is wrong', "i'm fine", 'what is wrong', 'not talking'],
+    question: "Why is communication so indirect sometimes when something is wrong?",
+    answer: `When someone says "I'm fine" despite obviously feeling upset, it usually stems from one of three psychological reasons:\n\nConflict Avoidance: A desire to avoid an immediate argument or emotional escalation until they've processed their thoughts.\n\nDesire for Unprompted Empathy: A hope that their partner will notice their emotional shift organically, signaling attentiveness and care.\n\nSafety and Comfort: Feeling uncertain about how the other person will react to vulnerable or critical feedback.\n\nPro-Tip for Men: Instead of asking "What's wrong?", try phrasing it as "I notice you seem a bit quiet/stressed today. I'm here whenever you're ready to talk about it."`,
+  },
+  {
+    keywords: ['romance', 'romantic', 'day to day', 'daily romance', 'what is romance'],
+    question: "What does 'romance' actually mean in day-to-day life?",
+    answer: `Grand gestures (like expensive dinners or surprise trips) are memorable, but relationship research shows that daily consistency matters far more than occasional extravagance.\n\nMicro-attunement: Noticing small details (e.g., bringing her favorite coffee, remembering an important meeting she mentioned days ago).\n\nActs of Service: Relieving mental load—taking care of a chore without being asked.\n\nUnsolicited Compliments: Expressing genuine appreciation for who she is, not just how she looks.`,
+  },
+  {
+    keywords: ['thinking about nothing', 'nothing on his mind', 'what are you thinking', 'thinking nothing', 'blank mind'],
+    question: "What does it mean when a guy says he's thinking about 'nothing'?",
+    answer: `Women often find this answer hard to believe, but psychologically, men are often being completely literal.\n\nThe Cognitive Rest State: Neurologically, men's brains often enter a default mode network where they engage in low-level, non-sequential daydreaming (e.g., replaying a sports play, thinking about a random movie quote, or literally zoning out).\n\nNo Hidden Meaning: It rarely means he is hiding a thought, withholding emotion, or upset; it simply means his brain is resting.`,
+  },
+  {
+    keywords: ['men vulnerable', 'men overwhelmed', 'men express feelings', 'men emotions', 'men stress', 'how men cope'],
+    question: "How do men express vulnerability when they are feeling overwhelmed?",
+    answer: `Due to societal conditioning, men often manifest vulnerability, stress, or sadness differently than women do.\n\nAction over Words: Instead of talking through an emotion immediately, men frequently process stress by retreating into an activity (working out, gaming, fixing something, or spending time alone).\n\nPhysical Presence: Men often feel safer opening up while doing an activity side-by-side (like driving, walking, or cooking) rather than sitting face-to-face in an intense conversation.`,
+  },
+  {
+    keywords: ['initiating intimacy', 'initiate affection', 'men want to be pursued', 'men want affection', 'who initiates', 'initiate physical'],
+    question: "Does initiating intimacy or affection matter to men as much as it does to women?",
+    answer: `Yes, absolutely. Men frequently report feeling a lack of physical and emotional validation when they are expected to be the sole initiators of physical closeness.\n\nDesire to Feel Wanted: Men want to feel actively pursued and desired, not just accepted.\n\nBuilding Connection: Small, spontaneous acts—like an unexpected hug, holding his hand first, or initiating physical intimacy—go a long way in reinforcing his confidence and emotional connection to the relationship.`,
+  },
 ];
 
 const FALLBACK_RESPONSES = [
@@ -153,7 +190,7 @@ function getBethResponse(userMessage: string): { answer: string; videoKey: strin
   const lower = userMessage.toLowerCase();
   for (const item of SCRIPTED_ANSWERS) {
     if (item.keywords.some((kw) => lower.includes(kw))) {
-      return { answer: item.answer, videoKey: item.videoKey };
+      return { answer: item.answer, videoKey: item.videoKey ?? null };
     }
   }
   const response = FALLBACK_RESPONSES[fallbackIndex % FALLBACK_RESPONSES.length];
