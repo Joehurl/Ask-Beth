@@ -13,7 +13,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.placeholder.app",
+      "bundleIdentifier": "com.askbeth.app",
       "icon": "./assets/images/f8290115-19d6-440b-b69a-ffb7d6ee90ef.jpeg",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -30,7 +30,7 @@
         "resizeMode": "contain",
         "backgroundColor": "#000000"
       },
-      "package": "com.placeholder.app"
+      "package": "com.askbeth.app"
     },
     "web": {
       "favicon": "./assets/images/newly.png",
