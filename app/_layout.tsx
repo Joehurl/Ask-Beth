@@ -14,10 +14,13 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WidgetProvider } from "@/contexts/WidgetContext";
 import { SubscriptionProvider, useSubscription } from "@/contexts/SubscriptionContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { isOnboardingComplete } from "@/utils/onboardingStorage";
+
+const FREE_QUESTION_KEY = "beth_free_question_used";
 
 const DevErrorBoundary = __DEV__
   ? ErrorBoundary
@@ -52,24 +55,29 @@ function SubscriptionRedirect() {
     if (loading) return;
     const onOnboarding = pathname.startsWith("/onboarding");
     if (onOnboarding) return;
+    const onPaywall = pathname === "/paywall";
+    if (onPaywall) return;
+    if (isSubscribed) return;
 
     let cancelled = false;
-    isOnboardingComplete().then((done) => {
-      if (cancelled) return;
-      if (!done) return;
-      const onPaywall = pathname === "/paywall";
-      if (onPaywall) return;
-      if (!isSubscribed) {
-        router.replace("/paywall");
-      }
-    }).catch(() => {
-      if (cancelled) return;
-      const onPaywall = pathname === "/paywall";
-      if (onPaywall) return;
-      if (!isSubscribed) {
-        router.replace("/paywall");
-      }
-    });
+    isOnboardingComplete()
+      .then((done) => {
+        if (cancelled || !done) return;
+        // Only redirect if the free question has already been used
+        return AsyncStorage.getItem(FREE_QUESTION_KEY).then((freeUsed) => {
+          if (cancelled) return;
+          if (freeUsed === "true") {
+            console.log("[SubscriptionRedirect] Free question used and not subscribed — redirecting to paywall");
+            router.replace("/paywall");
+          } else {
+            console.log("[SubscriptionRedirect] Free question not yet used — allowing through");
+          }
+        });
+      })
+      .catch(() => {
+        // On error, be permissive
+        console.log("[SubscriptionRedirect] Error checking state — allowing through");
+      });
     return () => { cancelled = true; };
   }, [isSubscribed, loading, pathname, router]);
 

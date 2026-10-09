@@ -97,17 +97,26 @@ export function SubscriptionProvider({ children }: SubscriptionProviderProps) {
 
     // Fetch offerings via REST API for web platform
   const fetchOfferingsViaRest = async () => {
-    // Mock package with real prices from RevenueCat dashboard
-    const mockPackage = {
+    // Mock packages with real prices from RevenueCat dashboard
+    const mockMonthly = {
       identifier: "$rc_monthly",
       product: {
-        title: "Premium",
+        title: "Monthly",
         priceString: "$9.99/month",
-        description: "Unlock all premium features",
+        description: "Billed monthly",
+      },
+    };
+    const mockAnnual = {
+      identifier: "$rc_annual",
+      product: {
+        title: "Annual",
+        priceString: "$99.99/year",
+        description: "Billed annually · Save 17%",
       },
     };
 
-    setPackages([mockPackage] as PurchasesPackage[]);
+    // Annual first so it is the default selected package
+    setPackages([mockAnnual, mockMonthly] as PurchasesPackage[]);
     console.log("[revenuecat] Web preview: showing real prices from dashboard");
   };
 

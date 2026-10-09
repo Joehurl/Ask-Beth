@@ -88,8 +88,14 @@ export default function PaywallScreen() {
     mockNativePurchase,
   } = useSubscription();
 
+  // Default to annual package (best value) — find it by identifier, fall back to first
+  const findDefaultPackage = (pkgs: PurchasesPackage[]) => {
+    const annual = pkgs.find((p) => p.identifier.toLowerCase().includes("annual") || p.identifier === "$rc_annual");
+    return annual || pkgs[0] || null;
+  };
+
   const [selectedPackage, setSelectedPackage] =
-    useState<PurchasesPackage | null>(packages[0] || null);
+    useState<PurchasesPackage | null>(findDefaultPackage(packages));
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [webMockState, setWebMockState] = useState<"idle" | "processing">("idle");
@@ -99,8 +105,9 @@ export default function PaywallScreen() {
 
   React.useEffect(() => {
     if (packages.length > 0 && !selectedPackage) {
-      setSelectedPackage(packages[0]);
+      setSelectedPackage(findDefaultPackage(packages));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [packages, selectedPackage]);
 
   const handlePurchase = async () => {
@@ -289,6 +296,21 @@ export default function PaywallScreen() {
               {packages.map((pkg) => {
                 const isSelected =
                   selectedPackage?.identifier === pkg.identifier;
+                const isAnnual =
+                  pkg.identifier.toLowerCase().includes("annual") ||
+                  pkg.identifier === "$rc_annual";
+                const isMonthly =
+                  pkg.identifier.toLowerCase().includes("monthly") ||
+                  pkg.identifier === "$rc_monthly";
+
+                // Hardcoded fallback display prices
+                const fallbackPrice = isAnnual
+                  ? "$99.99/year"
+                  : isMonthly
+                  ? "$9.99/month"
+                  : null;
+                const displayPrice = pkg.product.priceString || fallbackPrice;
+
                 return (
                   <TouchableOpacity
                     key={pkg.identifier}
@@ -301,19 +323,29 @@ export default function PaywallScreen() {
                   >
                     {isSelected && <View style={styles.selectedTopBar} />}
                     <View style={styles.packageHeader}>
-                      <Text style={styles.packageTitle}>
-                        {pkg.product.title}
-                      </Text>
+                      <View style={styles.packageTitleRow}>
+                        <Text style={styles.packageTitle}>
+                          {pkg.product.title}
+                        </Text>
+                        {isAnnual && (
+                          <View style={styles.bestValueBadge}>
+                            <Text style={styles.bestValueText}>BEST VALUE</Text>
+                          </View>
+                        )}
+                        {isAnnual && (
+                          <View style={styles.saveBadge}>
+                            <Text style={styles.saveBadgeText}>Save 17%</Text>
+                          </View>
+                        )}
+                      </View>
                       {isSelected && (
                         <View style={styles.checkmarkCircle}>
                           <Text style={styles.checkmark}>✓</Text>
                         </View>
                       )}
                     </View>
-                    {pkg.product.priceString ? (
-                      <Text style={styles.packagePrice}>
-                        {pkg.product.priceString}
-                      </Text>
+                    {displayPrice ? (
+                      <Text style={styles.packagePrice}>{displayPrice}</Text>
                     ) : null}
                     {pkg.product.description ? (
                       <Text style={styles.packageDescription}>
@@ -686,10 +718,42 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  packageTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+    flexWrap: "wrap",
+  },
   packageTitle: {
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.textPrimary,
+  },
+  bestValueBadge: {
+    backgroundColor: COLORS.gold,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  bestValueText: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: COLORS.background,
+    letterSpacing: 1,
+  },
+  saveBadge: {
+    backgroundColor: "rgba(201, 168, 76, 0.15)",
+    borderWidth: 1,
+    borderColor: COLORS.goldBorder,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  saveBadgeText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: COLORS.gold,
   },
   checkmarkCircle: {
     width: 22,

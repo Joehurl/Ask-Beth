@@ -13,11 +13,13 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { ChevronLeft, Trash2, Send, Mic, X, Volume2 } from 'lucide-react-native';
 import { useSubscriptionGuard } from '@/hooks/useSubscriptionGuard';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import Reanimated, {
   useSharedValue,
   useAnimatedStyle,
@@ -29,6 +31,8 @@ import Reanimated, {
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { Message } from '@/utils/sessions';
+
+const FREE_QUESTION_KEY = 'beth_free_question_used';
 
 const COLORS = {
   background: '#0A0A0F',
@@ -387,6 +391,7 @@ export default function ChatScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams<{ q?: string }>();
+  const { isSubscribed } = useSubscription();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -429,7 +434,7 @@ export default function ChatScreen() {
     const delay = 1500 + Math.random() * 1000;
     console.log('[Chat] Beth is typing, delay:', Math.round(delay), 'ms');
 
-    setTimeout(() => {
+    setTimeout(async () => {
       const { answer, videoKey } = getBethResponse(trimmed);
       console.log('[Chat] Beth responded:', answer.substring(0, 50) + '...', 'videoKey:', videoKey);
       const bethMsg: Message = {
@@ -441,8 +446,28 @@ export default function ChatScreen() {
       };
       setMessages((prev) => [...prev, bethMsg]);
       setIsTyping(false);
+
+      // Free question gate: only applies to non-subscribed users
+      if (!isSubscribed) {
+        try {
+          const freeUsed = await AsyncStorage.getItem(FREE_QUESTION_KEY);
+          if (freeUsed !== 'true') {
+            // This was the free question — mark it as used
+            console.log('[Chat] Free question used — marking in AsyncStorage');
+            await AsyncStorage.setItem(FREE_QUESTION_KEY, 'true');
+          } else {
+            // Free question already used — redirect to paywall after a short delay
+            console.log('[Chat] Free question already used — redirecting to paywall');
+            setTimeout(() => {
+              router.replace('/paywall');
+            }, 1500);
+          }
+        } catch (e) {
+          console.log('[Chat] AsyncStorage error in free question gate:', e);
+        }
+      }
     }, delay);
-  }, []);
+  }, [isSubscribed, router]);
 
   sendMessageRef.current = sendMessage;
 
