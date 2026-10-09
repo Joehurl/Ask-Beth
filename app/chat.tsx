@@ -287,8 +287,6 @@ function MessageBubble({ message }: MessageBubbleProps) {
     );
   }
 
-  const btnGoldColor = hasPrerecorded ? '#E0BC5A' : '#C9A84C';
-
   return (
     <View style={styles.bethMsgWrapper}>
       <Image source={BETH_AVATAR} style={styles.msgAvatar} contentFit="cover" />
