@@ -272,10 +272,9 @@ interface MessageBubbleProps {
   isLoadingVideo?: boolean;
 }
 
-function MessageBubble({ message, onHearBeth, isLoadingVideo }: MessageBubbleProps) {
+function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === 'user';
   const timeStr = formatTime(message.timestamp);
-  const hasPrerecorded = !!(message.videoKey && PRERECORDED_VIDEOS[message.videoKey]);
 
   if (isUser) {
     return (
@@ -298,26 +297,6 @@ function MessageBubble({ message, onHearBeth, isLoadingVideo }: MessageBubblePro
           <Text style={styles.bethBubbleText}>{message.content}</Text>
         </View>
         <Text style={styles.timestamp}>{timeStr}</Text>
-        <AnimatedPressable
-          onPress={() => {
-            const prerecordedUrl = message.videoKey ? PRERECORDED_VIDEOS[message.videoKey] : undefined;
-            console.log('[Chat] Hear Beth answer pressed for message:', message.id, 'prerecorded:', !!prerecordedUrl);
-            onHearBeth?.(message.id, message.content, prerecordedUrl);
-          }}
-          disabled={!hasPrerecorded && isLoadingVideo}
-          style={styles.hearBethBtn}
-        >
-          {!hasPrerecorded && isLoadingVideo ? (
-            <ActivityIndicator size="small" color="#C9A84C" />
-          ) : (
-            <>
-              <Volume2 size={13} color={btnGoldColor} />
-              <Text style={[styles.hearBethText, { color: btnGoldColor }]}>
-                {hasPrerecorded ? '▶ Hear Beth answer' : 'Hear Beth answer'}
-              </Text>
-            </>
-          )}
-        </AnimatedPressable>
       </View>
     </View>
   );
@@ -466,7 +445,7 @@ export default function ChatScreen() {
             console.log('[Chat] Free question already used — redirecting to paywall');
             setTimeout(() => {
               router.replace('/paywall');
-            }, 20000);
+            }, 40000);
           }
         } catch (e) {
           console.log('[Chat] AsyncStorage error in free question gate:', e);
@@ -594,15 +573,55 @@ export default function ChatScreen() {
           onContentSizeChange={() => {
             flatListRef.current?.scrollToEnd({ animated: true });
           }}
-          renderItem={({ item }) => {
+          renderItem={({ item, index }) => {
             if ('type' in item && item.type === 'typing') {
               return <TypingIndicator />;
             }
+            const msg = item as Message;
+            if (msg.role === 'assistant') {
+              const prevItem = index > 0 ? allItems[index - 1] : null;
+              const prevIsUser = prevItem && !('type' in prevItem) && (prevItem as Message).role === 'user';
+              const hasPrerecorded = !!(msg.videoKey && PRERECORDED_VIDEOS[msg.videoKey]);
+              const btnGoldColor = hasPrerecorded ? '#E0BC5A' : '#C9A84C';
+              return (
+                <View>
+                  {prevIsUser && (
+                    <View style={styles.hearBethBtnRow}>
+                      <AnimatedPressable
+                        onPress={() => {
+                          const prerecordedUrl = msg.videoKey ? PRERECORDED_VIDEOS[msg.videoKey] : undefined;
+                          console.log('[Chat] Hear Beth answer pressed for message:', msg.id, 'prerecorded:', !!prerecordedUrl);
+                          handleHearBeth(msg.id, msg.content, prerecordedUrl);
+                        }}
+                        disabled={!hasPrerecorded && videoLoadingMsgId === msg.id}
+                        style={styles.hearBethBtn}
+                      >
+                        {!hasPrerecorded && videoLoadingMsgId === msg.id ? (
+                          <ActivityIndicator size="small" color="#C9A84C" />
+                        ) : (
+                          <>
+                            <Volume2 size={13} color={btnGoldColor} />
+                            <Text style={[styles.hearBethText, { color: btnGoldColor }]}>
+                              {hasPrerecorded ? '▶ Hear Beth answer' : 'Hear Beth answer'}
+                            </Text>
+                          </>
+                        )}
+                      </AnimatedPressable>
+                    </View>
+                  )}
+                  <MessageBubble
+                    message={msg}
+                    onHearBeth={handleHearBeth}
+                    isLoadingVideo={videoLoadingMsgId === msg.id}
+                  />
+                </View>
+              );
+            }
             return (
               <MessageBubble
-                message={item as Message}
+                message={msg}
                 onHearBeth={handleHearBeth}
-                isLoadingVideo={videoLoadingMsgId === (item as Message).id}
+                isLoadingVideo={videoLoadingMsgId === msg.id}
               />
             );
           }}
@@ -772,6 +791,10 @@ const styles = StyleSheet.create({
     color: '#8A8A9A',
     marginTop: 4,
     marginHorizontal: 4,
+  },
+  hearBethBtnRow: {
+    paddingLeft: 36,
+    marginBottom: 6,
   },
   hearBethBtn: {
     flexDirection: 'row',
