@@ -4,24 +4,31 @@
     "slug": "ask-beth",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/app-icon-qfm.png",
+    "icon": "./assets/images/f8290115-19d6-440b-b69a-ffb7d6ee90ef.jpeg",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/app-icon-qfm.png",
+      "image": "./assets/images/f8290115-19d6-440b-b69a-ffb7d6ee90ef.jpeg",
       "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.placeholder.app",
+      "icon": "./assets/images/f8290115-19d6-440b-b69a-ffb7d6ee90ef.jpeg",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "icon": "./assets/images/f8290115-19d6-440b-b69a-ffb7d6ee90ef.jpeg",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/app-icon-qfm.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/images/f8290115-19d6-440b-b69a-ffb7d6ee90ef.jpeg",
+        "backgroundColor": "#000000"
+      },
+      "splash": {
+        "image": "./assets/images/f8290115-19d6-440b-b69a-ffb7d6ee90ef.jpeg",
+        "resizeMode": "contain",
+        "backgroundColor": "#000000"
       },
       "package": "com.placeholder.app"
     },
