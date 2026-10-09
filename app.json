@@ -43,6 +43,7 @@
       "expo-secure-store",
       "expo-video"
     ],
+    "newArchEnabled": true,
     "scheme": "askbeth",
     "experiments": {
       "typedRoutes": true
