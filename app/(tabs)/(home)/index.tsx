@@ -77,6 +77,7 @@ export default function HomeScreen() {
         bounciness: 6,
       }),
     ]).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleAskBeth() {

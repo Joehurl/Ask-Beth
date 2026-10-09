@@ -72,6 +72,7 @@ function SessionCard({ session, index, onPress }: SessionCardProps) {
         useNativeDriver: true,
       }),
     ]).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const firstUserMsg = session.messages.find((m) => m.role === 'user');

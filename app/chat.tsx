@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { ChevronLeft, Trash2, Send, Mic, X, Volume2 } from 'lucide-react-native';
+import { useSubscriptionGuard } from '@/hooks/useSubscriptionGuard';
 import Reanimated, {
   useSharedValue,
   useAnimatedStyle,
@@ -236,6 +237,7 @@ function TypingIndicator() {
     animate(dot1, 0);
     setTimeout(() => animate(dot2, 200), 200);
     setTimeout(() => animate(dot3, 400), 400);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const style1 = useAnimatedStyle(() => ({ opacity: dot1.value }));
@@ -381,6 +383,7 @@ function BethVideoModal({ videoUrl, onClose }: { videoUrl: string; onClose: () =
 }
 
 export default function ChatScreen() {
+  useSubscriptionGuard();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams<{ q?: string }>();
@@ -393,17 +396,18 @@ export default function ChatScreen() {
   const [videoLoadingMsgId, setVideoLoadingMsgId] = useState<string | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const hasAutoSent = useRef(false);
+  const sendMessageRef = useRef<(text: string) => void>(() => {});
 
   useEffect(() => {
     if (params.q && !hasAutoSent.current) {
       hasAutoSent.current = true;
-      const initialQ = params.q;
+      const initialQ = String(params.q);
       console.log('[Chat] Auto-sending initial question:', initialQ);
       setTimeout(() => {
-        sendMessage(initialQ);
+        sendMessageRef.current(initialQ);
       }, 300);
     }
-  }, []);
+  }, [params.q]);
 
   const sendMessage = useCallback((text: string) => {
     const trimmed = text.trim();
@@ -439,6 +443,8 @@ export default function ChatScreen() {
       setIsTyping(false);
     }, delay);
   }, []);
+
+  sendMessageRef.current = sendMessage;
 
   async function handleHearBeth(messageId: string, text: string, prerecordedUrl?: string) {
     // If we have a pre-recorded URL, play it instantly

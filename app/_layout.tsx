@@ -1,7 +1,7 @@
 import "react-native-reanimated";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, Redirect, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -15,7 +15,9 @@ import {
 } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { WidgetProvider } from "@/contexts/WidgetContext";
+import { SubscriptionProvider, useSubscription } from "@/contexts/SubscriptionContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { isOnboardingComplete } from "@/utils/onboardingStorage";
 
 const DevErrorBoundary = __DEV__
   ? ErrorBoundary
@@ -40,11 +42,53 @@ const CustomDarkTheme: Theme = {
   },
 };
 
+
+function SubscriptionRedirect() {
+  const { isSubscribed, loading } = useSubscription();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (loading) return;
+    const onOnboarding = pathname.startsWith("/onboarding");
+    if (onOnboarding) return;
+
+    let cancelled = false;
+    isOnboardingComplete().then((done) => {
+      if (cancelled) return;
+      if (!done) return;
+      const onPaywall = pathname === "/paywall";
+      if (onPaywall) return;
+      if (!isSubscribed) {
+        router.replace("/paywall");
+      }
+    }).catch(() => {
+      if (cancelled) return;
+      const onPaywall = pathname === "/paywall";
+      if (onPaywall) return;
+      if (!isSubscribed) {
+        router.replace("/paywall");
+      }
+    });
+    return () => { cancelled = true; };
+  }, [isSubscribed, loading, pathname, router]);
+
+  return null;
+}
+
 export default function RootLayout() {
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
+  const pathname = usePathname();
   const networkState = useNetworkState();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+
+  useEffect(() => {
+    isOnboardingComplete().then((complete) => {
+      setOnboardingComplete(complete);
+    });
+  }, [pathname]);
 
   useEffect(() => {
     if (loaded) {
@@ -52,7 +96,7 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       !networkState.isConnected &&
       networkState.isInternetReachable === false
@@ -64,14 +108,24 @@ export default function RootLayout() {
     }
   }, [networkState.isConnected, networkState.isInternetReachable]);
 
+  if (onboardingComplete === null) {
+    return null;
+  }
+
   return (
-    <DevErrorBoundary>
+    <SubscriptionProvider>
+          <SubscriptionRedirect />
+  <DevErrorBoundary>
       <StatusBar style="light" animated />
       <ThemeProvider value={CustomDarkTheme}>
         <SafeAreaProvider>
           <WidgetProvider>
             <GestureHandlerRootView>
+              {onboardingComplete === false && pathname !== "/auth" && pathname !== "/paywall" && pathname !== "/auth-popup" && pathname !== "/auth-callback" && <Redirect href="/onboarding" />}
+
               <Stack>
+                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="chat" options={{ headerShown: false }} />
                 <Stack.Screen name="voice" options={{ headerShown: false }} />
@@ -84,5 +138,6 @@ export default function RootLayout() {
         </SafeAreaProvider>
       </ThemeProvider>
     </DevErrorBoundary>
+    </SubscriptionProvider>
   );
 }

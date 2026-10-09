@@ -36,6 +36,7 @@ function WaveBar({ delay }: { delay: number }) {
         true
       )
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const animStyle = useAnimatedStyle(() => ({
@@ -101,6 +102,7 @@ export default function VoiceScreen() {
       clearTimeout(statusTimer);
       clearInterval(durationTimer);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const ringAnimStyle = useAnimatedStyle(() => ({
