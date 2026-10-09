@@ -185,6 +185,12 @@ const SCRIPTED_ANSWERS: ScriptedAnswer[] = [
     videoKey: 'initiate_intimacy',
   },
   {
+    keywords: ['women test', 'why do women test', 'testing men', 'women test men', 'is she testing me', 'why does she test'],
+    question: "Why do women test men without even realizing it?",
+    answer: `Most women aren't consciously running tests — but they are constantly reading for safety and consistency.\n\nWhat looks like a "test" is usually self-protection: she cancels plans last minute to see if you get angry or stay calm. She says "I'm fine" to see if you'll look closer. She picks a small argument to find out whether you'll shut down or stay present.\n\nThe Attachment Root: Women who've been let down before develop unconscious screening behaviors. They're not trying to trap you — they're trying to find out if you're the kind of person who stays when things get slightly uncomfortable.\n\nWhat actually passes the test: You don't need to be perfect. You need to be steady. Reacting with frustration or withdrawal confirms the fear. Staying calm, curious, and consistent is what signals: I'm not going anywhere.`,
+    videoKey: 'women_test',
+  },
+  {
     keywords: ['favorite place', 'favorite food', 'favorite restaurant', 'where do you eat', 'do you eat', 'do you have kids', 'where do you live', 'are you married', 'do you have a family', 'how old are you', 'where are you from', 'what do you like', 'your favorite', 'favourite', 'do you like', 'have you ever', 'have you been', 'tell me about yourself', 'who are you', 'about you'],
     answer: "I grew up in Charleston, South Carolina — so yes, I have opinions about food. My favorite place to eat is a small Italian spot in the West Village in New York that I've been going to for years. I order the same thing every time and I'm not sorry about it. I've lived in New York for most of my adult life, though I still get back to Charleston when I can. I'm not married — I came close once, and I learned more from that than from anything else in my life. No kids, but I have a niece who I'm completely devoted to. I've spent the last twenty years advising people through the hardest decisions of their lives, and honestly, I wouldn't trade it.",
   },
