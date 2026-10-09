@@ -21,7 +21,6 @@ import {
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { PurchasesPackage } from "react-native-purchases";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -50,6 +49,23 @@ const COLORS = {
   textSecondary: "#8A8A9A",
   textDim: "rgba(245, 240, 232, 0.6)",
 };
+
+const HARDCODED_PLANS = [
+  {
+    key: "annual",
+    label: "Annual",
+    price: "$99.99/year",
+    sublabel: "Just $8.33/month",
+    isAnnual: true,
+  },
+  {
+    key: "monthly",
+    label: "Monthly",
+    price: "$9.99/month",
+    sublabel: null,
+    isAnnual: false,
+  },
+];
 
 const FEATURES = [
   {
@@ -88,14 +104,25 @@ export default function PaywallScreen() {
     mockNativePurchase,
   } = useSubscription();
 
-  // Default to annual package (best value) — find it by identifier, fall back to first
-  const findDefaultPackage = (pkgs: PurchasesPackage[]) => {
-    const annual = pkgs.find((p) => p.identifier.toLowerCase().includes("annual") || p.identifier === "$rc_annual");
-    return annual || pkgs[0] || null;
+  const findRcPackage = (key: string) => {
+    if (key === "annual") {
+      return packages.find(
+        (p) =>
+          p.identifier === "$rc_annual" ||
+          p.identifier.toLowerCase().includes("annual")
+      ) || null;
+    }
+    if (key === "monthly") {
+      return packages.find(
+        (p) =>
+          p.identifier === "$rc_monthly" ||
+          p.identifier.toLowerCase().includes("monthly")
+      ) || null;
+    }
+    return null;
   };
 
-  const [selectedPackage, setSelectedPackage] =
-    useState<PurchasesPackage | null>(findDefaultPackage(packages));
+  const [selectedKey, setSelectedKey] = useState<"annual" | "monthly">("annual");
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [webMockState, setWebMockState] = useState<"idle" | "processing">("idle");
@@ -103,19 +130,19 @@ export default function PaywallScreen() {
     "hidden" | "selecting" | "failed"
   >("hidden");
 
-  React.useEffect(() => {
-    if (packages.length > 0 && !selectedPackage) {
-      setSelectedPackage(findDefaultPackage(packages));
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [packages, selectedPackage]);
-
   const handlePurchase = async () => {
-    if (!selectedPackage) return;
-    console.log("[Paywall] Subscribe button pressed, package:", selectedPackage.identifier);
+    const rcPkg = findRcPackage(selectedKey);
+    if (!rcPkg) {
+      Alert.alert(
+        "Purchases not available in preview",
+        "Use the mobile app to complete your purchase."
+      );
+      return;
+    }
+    console.log("[Paywall] Subscribe button pressed, package:", rcPkg.identifier);
     try {
       setPurchasing(true);
-      const success = await purchasePackage(selectedPackage);
+      const success = await purchasePackage(rcPkg);
       if (success) {
         console.log("[Paywall] Purchase successful, navigating to home");
         Alert.alert("Welcome to Beth Pro!", "You now have unlimited access.", [
@@ -161,17 +188,16 @@ export default function PaywallScreen() {
   };
 
   const handleWebMockPurchase = async () => {
-    if (!selectedPackage) return;
-    console.log("[Paywall] Web mock purchase initiated");
+    console.log("[Paywall] Web mock purchase initiated, plan:", selectedKey);
     setWebMockState("processing");
     await new Promise((resolve) => setTimeout(resolve, 400));
     setWebMockState("idle");
     setWebMockDialogState("selecting");
   };
 
-  const handlePackageSelect = (pkg: PurchasesPackage) => {
-    console.log("[Paywall] Package selected:", pkg.identifier);
-    setSelectedPackage(pkg);
+  const handlePlanSelect = (key: "annual" | "monthly") => {
+    console.log("[Paywall] Plan selected:", key);
+    setSelectedKey(key);
   };
 
   // Already subscribed
@@ -232,11 +258,10 @@ export default function PaywallScreen() {
     );
   }
 
-  const subscribeLabel = selectedPackage
-    ? selectedPackage.product.priceString
-      ? `Subscribe for ${selectedPackage.product.priceString}`
-      : "Subscribe"
-    : "Select a plan";
+  const selectedPlan = HARDCODED_PLANS.find((p) => p.key === selectedKey)!;
+  const selectedRcPkg = findRcPackage(selectedKey);
+  const selectedPriceString = selectedRcPkg?.product.priceString || selectedPlan.price;
+  const subscribeLabel = `Subscribe for ${selectedPriceString}`;
 
   return (
     <View style={styles.container}>
@@ -290,99 +315,54 @@ export default function PaywallScreen() {
             })}
           </View>
 
-          {/* Package Selection */}
-          {packages.length > 0 && (
-            <View style={styles.packagesContainer}>
-              {packages.map((pkg) => {
-                const isSelected =
-                  selectedPackage?.identifier === pkg.identifier;
-                const isAnnual =
-                  pkg.identifier.toLowerCase().includes("annual") ||
-                  pkg.identifier === "$rc_annual";
-                const isMonthly =
-                  pkg.identifier.toLowerCase().includes("monthly") ||
-                  pkg.identifier === "$rc_monthly";
+          {/* Package Selection — always rendered, merges RC data when available */}
+          <View style={styles.packagesContainer}>
+            {HARDCODED_PLANS.map((plan) => {
+              const isSelected = selectedKey === plan.key;
+              const rcPkg = findRcPackage(plan.key);
+              const displayPrice = rcPkg?.product.priceString || plan.price;
+              const displayTitle = rcPkg?.product.title || plan.label;
+              const displaySublabel = plan.sublabel;
 
-                // Hardcoded fallback display prices
-                const fallbackPrice = isAnnual
-                  ? "$99.99/year"
-                  : isMonthly
-                  ? "$9.99/month"
-                  : null;
-                const displayPrice = pkg.product.priceString || fallbackPrice;
-
-                return (
-                  <TouchableOpacity
-                    key={pkg.identifier}
-                    style={[
-                      styles.packageCard,
-                      isSelected && styles.packageCardSelected,
-                    ]}
-                    onPress={() => handlePackageSelect(pkg)}
-                    activeOpacity={0.8}
-                  >
-                    {isSelected && <View style={styles.selectedTopBar} />}
-                    <View style={styles.packageHeader}>
-                      <View style={styles.packageTitleRow}>
-                        <Text style={styles.packageTitle}>
-                          {pkg.product.title}
-                        </Text>
-                        {isAnnual && (
-                          <View style={styles.bestValueBadge}>
-                            <Text style={styles.bestValueText}>BEST VALUE</Text>
-                          </View>
-                        )}
-                        {isAnnual && (
-                          <View style={styles.saveBadge}>
-                            <Text style={styles.saveBadgeText}>Save 17%</Text>
-                          </View>
-                        )}
-                      </View>
-                      {isSelected && (
-                        <View style={styles.checkmarkCircle}>
-                          <Text style={styles.checkmark}>✓</Text>
+              return (
+                <TouchableOpacity
+                  key={plan.key}
+                  style={[
+                    styles.packageCard,
+                    isSelected && styles.packageCardSelected,
+                  ]}
+                  onPress={() => handlePlanSelect(plan.key as "annual" | "monthly")}
+                  activeOpacity={0.8}
+                >
+                  {isSelected && <View style={styles.selectedTopBar} />}
+                  <View style={styles.packageHeader}>
+                    <View style={styles.packageTitleRow}>
+                      <Text style={styles.packageTitle}>{displayTitle}</Text>
+                      {plan.isAnnual && (
+                        <View style={styles.bestValueBadge}>
+                          <Text style={styles.bestValueText}>BEST VALUE</Text>
+                        </View>
+                      )}
+                      {plan.isAnnual && (
+                        <View style={styles.saveBadge}>
+                          <Text style={styles.saveBadgeText}>Save 17%</Text>
                         </View>
                       )}
                     </View>
-                    {displayPrice ? (
-                      <Text style={styles.packagePrice}>{displayPrice}</Text>
-                    ) : null}
-                    {pkg.product.description ? (
-                      <Text style={styles.packageDescription}>
-                        {pkg.product.description}
-                      </Text>
-                    ) : null}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          )}
-
-          {/* No packages — Expo Go notice */}
-          {!isWeb && packages.length === 0 && !loading && (
-            <View style={styles.noPackagesContainer}>
-              <Text style={styles.noPackagesText}>
-                Purchases are not available in standard Expo Go.
-              </Text>
-              <Text style={[styles.noPackagesText, { marginTop: 8, opacity: 0.6 }]}>
-                Use a development or production build to test purchases.
-              </Text>
-              {__DEV__ && (
-                <TouchableOpacity
-                  style={styles.devMockButton}
-                  onPress={async () => {
-                    console.log("[Paywall] Dev: Simulate Purchase pressed");
-                    await mockNativePurchase();
-                    router.replace("/(tabs)/(home)");
-                  }}
-                >
-                  <Text style={styles.devMockButtonText}>
-                    Dev: Simulate Purchase
-                  </Text>
+                    {isSelected && (
+                      <View style={styles.checkmarkCircle}>
+                        <Text style={styles.checkmark}>✓</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.packagePrice}>{displayPrice}</Text>
+                  {displaySublabel ? (
+                    <Text style={styles.packageDescription}>{displaySublabel}</Text>
+                  ) : null}
                 </TouchableOpacity>
-              )}
-            </View>
-          )}
+              );
+            })}
+          </View>
         </ScrollView>
 
         {/* Bottom CTA */}
@@ -392,11 +372,10 @@ export default function PaywallScreen() {
               <TouchableOpacity
                 style={[
                   styles.primaryButton,
-                  (!selectedPackage || webMockState === "processing") &&
-                    styles.buttonDisabled,
+                  webMockState === "processing" && styles.buttonDisabled,
                 ]}
                 onPress={handleWebMockPurchase}
-                disabled={!selectedPackage || webMockState === "processing"}
+                disabled={webMockState === "processing"}
                 activeOpacity={0.85}
               >
                 {webMockState === "processing" ? (
@@ -436,10 +415,10 @@ export default function PaywallScreen() {
               <TouchableOpacity
                 style={[
                   styles.primaryButton,
-                  (!selectedPackage || purchasing) && styles.buttonDisabled,
+                  purchasing && styles.buttonDisabled,
                 ]}
                 onPress={handlePurchase}
-                disabled={!selectedPackage || purchasing}
+                disabled={purchasing}
                 activeOpacity={0.85}
               >
                 {purchasing ? (
@@ -492,7 +471,7 @@ export default function PaywallScreen() {
               <>
                 <Text style={styles.webDialogTitle}>Test Purchase</Text>
                 <Text style={styles.webDialogBody}>
-                  {`⚠️ This is a test purchase for development only.\n\nPackage: ${selectedPackage?.identifier}\nPrice: ${selectedPackage?.product.priceString || "N/A"}`}
+                  {`⚠️ This is a test purchase for development only.\n\nPlan: ${selectedKey}\nPrice: ${selectedPriceString}`}
                 </Text>
                 <View style={styles.webDialogDivider} />
                 <TouchableOpacity
