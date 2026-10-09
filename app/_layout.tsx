@@ -6,7 +6,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import { useNetworkState } from "expo-network";
 import {
   DarkTheme,
@@ -52,6 +52,7 @@ function SubscriptionRedirect() {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (Platform.OS === "web") return; // allow free navigation in web preview
     if (loading) return;
     const onOnboarding = pathname.startsWith("/onboarding");
     if (onOnboarding) return;

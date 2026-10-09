@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { useRouter, usePathname } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -19,6 +20,7 @@ export function useSubscriptionGuard() {
   }, [pathname]);
 
   useEffect(() => {
+    if (Platform.OS === "web") return; // allow free navigation in web preview
     if (loading || onboardingDone === null || isSubscribed) return;
     if (!onboardingDone) return;
 

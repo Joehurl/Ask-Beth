@@ -416,6 +416,17 @@ export default function PaywallScreen() {
                   <Text style={styles.restoreButtonText}>Restore Purchases</Text>
                 )}
               </TouchableOpacity>
+              {__DEV__ && (
+                <TouchableOpacity
+                  style={styles.skipDevButton}
+                  onPress={() => {
+                    console.log("[Paywall] DEV: Skip for now (Preview) pressed");
+                    router.replace("/(tabs)/(home)");
+                  }}
+                >
+                  <Text style={styles.skipDevButtonText}>Skip for now (Preview)</Text>
+                </TouchableOpacity>
+              )}
               <Text style={styles.legalText}>
                 Preview mode — purchases available in the mobile app
               </Text>
@@ -449,6 +460,18 @@ export default function PaywallScreen() {
                   <Text style={styles.restoreButtonText}>Restore Purchases</Text>
                 )}
               </TouchableOpacity>
+
+              {__DEV__ && (
+                <TouchableOpacity
+                  style={styles.skipDevButton}
+                  onPress={() => {
+                    console.log("[Paywall] DEV: Skip for now (Preview) pressed");
+                    router.replace("/(tabs)/(home)");
+                  }}
+                >
+                  <Text style={styles.skipDevButtonText}>Skip for now (Preview)</Text>
+                </TouchableOpacity>
+              )}
 
               <Text style={styles.legalText}>
                 Payment will be charged to your{" "}
@@ -844,6 +867,14 @@ const styles = StyleSheet.create({
   restoreButtonText: {
     fontSize: 14,
     color: COLORS.textSecondary,
+  },
+  skipDevButton: {
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  skipDevButtonText: {
+    fontSize: 12,
+    color: "rgba(138,138,154,0.5)",
   },
   legalText: {
     fontSize: 11,
