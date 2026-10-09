@@ -105,21 +105,37 @@ export default function PaywallScreen() {
   } = useSubscription();
 
   const findRcPackage = (key: string) => {
+    if (packages.length === 0) return null;
     if (key === "annual") {
-      return packages.find(
+      // Try exact/keyword match first, then fall back to highest-priced package
+      const match = packages.find(
         (p) =>
           p.identifier === "$rc_annual" ||
-          p.identifier.toLowerCase().includes("annual")
-      ) || null;
+          p.identifier.toLowerCase().includes("annual") ||
+          p.identifier.toLowerCase().includes("year")
+      );
+      if (match) return match;
+      // Fallback: package with the highest price
+      return packages.reduce((best, p) =>
+        (p.product.price ?? 0) > (best.product.price ?? 0) ? p : best
+      );
     }
     if (key === "monthly") {
-      return packages.find(
+      // Try exact/keyword match first, then fall back to lowest-priced package
+      const match = packages.find(
         (p) =>
           p.identifier === "$rc_monthly" ||
-          p.identifier.toLowerCase().includes("monthly")
-      ) || null;
+          p.identifier.toLowerCase().includes("month") ||
+          p.identifier.toLowerCase().includes("week")
+      );
+      if (match) return match;
+      // Fallback: package with the lowest price
+      return packages.reduce((best, p) =>
+        (p.product.price ?? Infinity) < (best.product.price ?? Infinity) ? p : best
+      );
     }
-    return null;
+    // Generic fallback: first available package
+    return packages[0] ?? null;
   };
 
   const [selectedKey, setSelectedKey] = useState<"annual" | "monthly">("annual");
@@ -131,15 +147,18 @@ export default function PaywallScreen() {
   >("hidden");
 
   const handlePurchase = async () => {
+    console.log("[Paywall] Subscribe button pressed, plan:", selectedKey, "packages available:", packages.length);
     const rcPkg = findRcPackage(selectedKey);
     if (!rcPkg) {
+      // No packages loaded at all — RC not configured or network error
+      console.log("[Paywall] No RC packages available, cannot open payment sheet");
       Alert.alert(
-        "Purchases not available in preview",
-        "Use the mobile app to complete your purchase."
+        "Purchases not available",
+        "Subscription products could not be loaded. Please check your connection and try again."
       );
       return;
     }
-    console.log("[Paywall] Subscribe button pressed, package:", rcPkg.identifier);
+    console.log("[Paywall] Opening payment sheet for package:", rcPkg.identifier);
     try {
       setPurchasing(true);
       const success = await purchasePackage(rcPkg);
