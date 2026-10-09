@@ -460,7 +460,7 @@ export default function ChatScreen() {
             console.log('[Chat] Free question already used — redirecting to paywall');
             setTimeout(() => {
               router.replace('/paywall');
-            }, 1500);
+            }, 5000);
           }
         } catch (e) {
           console.log('[Chat] AsyncStorage error in free question gate:', e);
