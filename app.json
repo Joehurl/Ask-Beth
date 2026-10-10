@@ -16,7 +16,12 @@
       "bundleIdentifier": "com.askbeth.app",
       "icon": "./assets/images/f8290115-19d6-440b-b69a-ffb7d6ee90ef.jpeg",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["rc-d0a4aca336"]
+          }
+        ]
       }
     },
     "android": {
