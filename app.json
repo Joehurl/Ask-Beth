@@ -42,7 +42,8 @@
       "expo-web-browser",
       "expo-secure-store",
       "expo-video",
-      "react-native-edge-to-edge"
+      "react-native-edge-to-edge",
+      "@react-native-community/datetimepicker"
     ],
     "newArchEnabled": true,
     "scheme": "askbeth",
