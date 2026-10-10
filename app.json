@@ -19,7 +19,9 @@
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["rc-d0a4aca336"]
+            "CFBundleURLSchemes": [
+              "rc-d0a4aca336"
+            ]
           }
         ]
       }
