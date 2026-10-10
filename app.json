@@ -42,7 +42,6 @@
       "expo-web-browser",
       "expo-secure-store",
       "expo-video",
-      "react-native-reanimated",
       "react-native-edge-to-edge"
     ],
     "newArchEnabled": true,
